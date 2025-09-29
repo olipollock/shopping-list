@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Persistent Shopping List</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-size: 18px;
+  padding: 20px;
+  background: #f4f6f8;
+  margin: 0;
+}
+h1 {
+  text-align: center;
+  color: #2a7ae2;
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  background: #f4f6f8;
+  padding: 10px 0;
+  z-index: 10;
+}
+details {
+  background: linear-gradient(135deg, #e0f7ff, #ccefff);
+  padding: 12px 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+details[open] {
+  background: linear-gradient(135deg, #ccefff, #a0e0ff);
+}
+summary {
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #007acc;
+  cursor: pointer;
+  padding: 5px 0;
+  outline: none;
+}
+label {
+  display: block;
+  padding: 8px 0;
+  transition: background 0.2s ease, color 0.3s ease;
+  border-radius: 6px;
+  position: relative;
+}
+label:hover { background: rgba(0, 122, 204, 0.1); }
+/* Custom checkbox */
+input[type="checkbox"] {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #007acc;
+  border-radius: 5px;
+  margin-right: 10px;
+  vertical-align: middle;
+  position: relative;
+  cursor: pointer;
+}
+input[type="checkbox"]:checked::after {
+  content: "✔";
+  position: absolute;
+  left: 3px;
+  top: 0;
+  font-size: 18px;
+  color: #007acc;
+}
+input[type="checkbox"]:checked + span {
+  text-decoration: line-through;
+  color: #888;
+  opacity: 0.7;
+}
+.optional-item { font-style: italic; color: #555; }
+.details-note { font-size: 0.9em; color: #555; margin-left: 25px; }
+hr { border: none; border-top: 1px solid #ccc; margin: 10px 0; }
+@media (max-width: 400px) {
+  body { font-size: 16px; padding: 15px; }
+  input[type="checkbox"] { width: 20px; height: 20px; }
+}
+</style>
+</head>
+<body>
+
+<h1>🛒 Shopping List (Persistent)</h1>
+
+<div class="details-note">Tip: Checked items are saved automatically and will persist when you reopen.</div>
+
+<!-- Produce / Fresh -->
+<details open>
+  <summary>🥦 Produce / Fresh</summary>
+  <!-- Herbs Subcategory -->
+  <details>
+    <summary>🌿 Herbs</summary>
+    <label><input type="checkbox" data-id="parsley"><span>Italian parsley – ½ cup</span></label>
+    <label><input type="checkbox" data-id="mint"><span>Mint leaves – ½ cup</span></label>
+    <label><input type="checkbox" data-id="dill"><span>Fresh dill – ⅓ cup</span></label>
+    <label><input type="checkbox" data-id="basil"><span>Fresh basil – ~½ cup torn</span></label>
+    <label><input type="checkbox" data-id="cilantro"><span>Fresh cilantro leaves – small bunch</span></label>
+  </details>
+
+  <!-- Other Vegetables -->
+  <label><input type="checkbox" data-id="yellow-onions"><span>Yellow onions – 7–9 medium</span></label>
+  <label><input type="checkbox" data-id="red-onion"><span>Red onion – 1 medium</span></label>
+  <label><input type="checkbox" data-id="dal-onion"><span>Yellow onion (for dal) – 1 medium</span></label>
+  <label><input type="checkbox" data-id="potatoes"><span>Potatoes – 3 medium</span></label>
+  <label><input type="checkbox" data-id="garlic"><span>Garlic – 10 cloves</span></label>
+  <label><input type="checkbox" data-id="scallions"><span>Scallions – 6</span></label>
+  <label><input type="checkbox" data-id="red-bell"><span>Red bell pepper – 1 large</span></label>
+  <label><input type="checkbox" data-id="lemon"><span>Lemon – 1</span></label>
+  <label><input type="checkbox" data-id="lemon-juice"><span>Fresh lemon juice – 1 Tbsp</span></label>
+  <label><input type="checkbox" data-id="ginger"><span>Fresh ginger – 1 (2-inch) knob</span></label>
+  <label><input type="checkbox" data-id="spinach"><span>Baby spinach – 2 cups, roughly chopped</span></label>
+</details>
+
+<!-- Meat & Protein -->
+<details open>
+  <summary>🥩 Meat & Protein</summary>
+  <label><input type="checkbox" data-id="beef"><span>Beef or lamb, diced – ⅓ lb</span></label>
+  <label><input type="checkbox" data-id="chicken"><span>Lean ground chicken – 1 lb</span></label>
+  <label><input type="checkbox" data-id="ham"><span>Ham – <span class="optional-item">optional</span></span></label>
+</details>
+
+<!-- Add the rest of your categories in same format... -->
+
+<script>
+// Save/load checkbox state using localStorage
+const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+checkboxes.forEach(cb => {
+  const id = cb.dataset.id;
+  if (!id) return;
+  // Load state
+  const saved = localStorage.getItem(id);
+  if (saved === 'true') cb.checked = true;
+
+  // Save state on change
+  cb.addEventListener('change', () => {
+    localStorage.setItem(id, cb.checked);
+  });
+});
+</script>
+
+</body>
+</html>
