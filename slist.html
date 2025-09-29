@@ -23,6 +23,7 @@ input[type="checkbox"] { appearance: none; width: 22px; height: 22px; border: 2p
 input[type="checkbox"]:checked::after { content: "✔"; position: absolute; left: 3px; top: 0; font-size: 18px; color: #007acc; }
 input[type="checkbox"]:checked + span { text-decoration: line-through; color: #555; }
 span.optional-item { font-style: italic; font-size: 0.9em; color: #555; }
+span.qty { font-size: 0.9em; margin-left:5px; color:#555; }
 .details-note { font-size: 0.9em; color: #555; margin-bottom:10px; }
 hr { border: none; border-top: 1px solid #ccc; margin: 10px 0; }
 .search-bar { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #007acc; margin-bottom: 15px; }
@@ -31,10 +32,6 @@ button:hover { background: #005fa3; }
 .add-item-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; align-items:center; }
 .add-item-container input[type="text"], .add-item-container input[list] { flex:1 1 140px; padding:6px 8px; border-radius:6px; border:1px solid #007acc; }
 .add-item-container label { display:flex; align-items:center; gap:4px; font-size:0.9em; }
-span.qty { display: inline-flex; align-items: center; gap:4px; font-size: 0.9em; }
-span.qty button { width: 24px; height: 24px; padding:0; font-size:16px; line-height:1; border-radius:4px; border:1px solid #007acc; background:#fff; color:#007acc; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-span.qty button:hover { background:#007acc; color:#fff; }
-span.qty span.number { min-width:20px; text-align:center; display:inline-block; }
 .progress { height: 10px; background: #ccc; border-radius: 5px; margin: 5px 0 10px 0; overflow: hidden; }
 .progress-bar { height: 100%; background: #007acc; width: 0%; transition: width 0.3s; }
 .dragging { opacity: 0.5; }
@@ -138,20 +135,15 @@ function renderList(){
     const progressBar=document.createElement('div'); progressBar.classList.add('progress-bar'); progressDiv.appendChild(progressBar); catDetails.appendChild(summary); catDetails.appendChild(progressDiv);
 
     cat.items.forEach((item,ii)=>{
-      if(item.qtyNumber===undefined) item.qtyNumber=1;
       const label=document.createElement('label'); label.draggable=true;
       const checkbox=document.createElement('input'); checkbox.type='checkbox'; checkbox.dataset.ci=ci; checkbox.dataset.ii=ii;
       if(item.checked) checkbox.checked=true;
       const spanText=document.createElement('span'); spanText.textContent=item.name; if(item.optional) spanText.classList.add('optional-item');
 
-      // Quantity controls
+      // Quantity display
       const qtySpan=document.createElement('span'); qtySpan.classList.add('qty');
-      const minusBtn=document.createElement('button'); minusBtn.textContent='-'; minusBtn.addEventListener('click',()=>{ if(item.qtyNumber>0){ item.qtyNumber--; qtyValue.textContent=item.qtyNumber; saveState(); } });
-      const qtyValue=document.createElement('span'); qtyValue.textContent=item.qtyNumber; qtyValue.classList.add('number');
-      const plusBtn=document.createElement('button'); plusBtn.textContent='+'; plusBtn.addEventListener('click',()=>{ item.qtyNumber++; qtyValue.textContent=item.qtyNumber; saveState(); });
-      qtySpan.appendChild(minusBtn); qtySpan.appendChild(qtyValue); qtySpan.appendChild(plusBtn);
-
-      if(item.qty) { const extraQty=document.createElement('span'); extraQty.textContent=' – '+item.qty; extraQty.style.marginLeft='5px'; qtySpan.appendChild(extraQty); }
+      if(item.qtyNumber===undefined) item.qtyNumber=1;
+      qtySpan.textContent = item.qtyNumber + (item.qty ? ' – ' + item.qty : '');
 
       checkbox.addEventListener('change', e=>{ undoStack.push({ci,ii,prev:item.checked}); item.checked=checkbox.checked; saveState(); updateProgress(); });
 
