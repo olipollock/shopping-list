@@ -9,49 +9,106 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   font-size: 18px;
   padding: 20px;
-  background: #f4f6f8;
+  background: #f8f9fa;
   margin: 0;
-  transition: background 0.3s, color 0.3s;
+  color: #222;
 }
-body.dark { background: #1e1e1e; color: #ddd; }
-h1 { text-align: center; color: #2a7ae2; margin-bottom: 20px; position: sticky; top: 0; background: inherit; padding: 10px 0; z-index: 10; }
-details { background: linear-gradient(135deg, #e0f7ff, #ccefff); padding: 12px 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; transition: all 0.4s ease; }
-body.dark details { background: linear-gradient(135deg, #2a2a2a, #3a3a3a); }
-details[open] { background: linear-gradient(135deg, #ccefff, #a0e0ff); }
-body.dark details[open] { background: #444; }
-summary { font-weight: bold; font-size: 1.2em; color: #007acc; cursor: pointer; padding: 5px 0; outline: none; }
-body.dark summary { color: #66aaff; }
-label { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-radius: 6px; position: relative; }
-label:hover { background: rgba(0, 122, 204, 0.1); }
-input[type="checkbox"] { appearance: none; width: 22px; height: 22px; border: 2px solid #007acc; border-radius: 5px; margin-right: 10px; vertical-align: middle; position: relative; cursor: pointer; }
-input[type="checkbox"]:checked::after { content: "✔"; position: absolute; left: 3px; top: 0; font-size: 18px; color: #007acc; }
-span.checked { text-decoration: line-through; color: #888; opacity: 0.7; }
-span.quantity-controls { display: flex; align-items: center; gap: 4px; font-size: 0.9em; margin-left: 5px; }
-span.quantity-controls button { width: 22px; height: 22px; border: 1px solid #007acc; background: #fff; border-radius: 4px; cursor: pointer; }
-.optional-item { font-style: italic; color: #555; }
-.notes { font-size: 0.9em; color: #555; margin-left: 30px; display:block; }
+h1 {
+  text-align: center;
+  color: #2a7ae2;
+  margin-bottom: 20px;
+}
+details {
+  background: #e0f7ff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+details[open] { background: #ccefff; }
+summary {
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #007acc;
+  cursor: pointer;
+  outline: none;
+}
+label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-radius: 6px;
+  position: relative;
+}
+label:hover { background: rgba(0,122,204,0.08); }
+input[type="checkbox"] {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #007acc;
+  border-radius: 5px;
+  margin-right: 10px;
+  position: relative;
+  cursor: pointer;
+}
+input[type="checkbox"]:checked::after {
+  content: "✔";
+  position: absolute;
+  left: 3px;
+  top: 0;
+  font-size: 18px;
+  color: #007acc;
+}
+input[type="checkbox"]:checked + span { text-decoration: line-through; color: #555; }
+span.optional-item { font-style: italic; font-size: 0.9em; color: #555; }
+span.qty { font-size: 0.9em; margin-left: 5px; color: #555; }
+.details-note { font-size: 0.9em; color: #555; margin-bottom:10px; }
 hr { border: none; border-top: 1px solid #ccc; margin: 10px 0; }
-.search-bar { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #007acc; margin-bottom: 10px; }
-button { cursor: pointer; margin: 5px 2px; }
+.search-bar {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #007acc;
+  margin-bottom: 15px;
+}
+button {
+  cursor: pointer;
+  padding: 6px 12px;
+  border: none;
+  background: #007acc;
+  color: #fff;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+button:hover { background: #005fa3; }
+.add-item-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+.add-item-container input[type="text"] { flex: 1 1 150px; padding:6px 8px; border-radius:6px; border:1px solid #007acc; }
+.add-item-container label { display: flex; align-items: center; gap:4px; font-size:0.9em; }
+.progress { height: 10px; background: #ccc; border-radius: 5px; margin: 5px 0 10px 0; overflow: hidden; }
+.progress-bar { height: 100%; background: #007acc; width: 0%; transition: width 0.3s; }
 .dragging { opacity: 0.5; }
-@media (max-width: 400px) { body { font-size: 16px; padding: 15px; } input[type="checkbox"] { width: 20px; height: 20px; } }
+@media (max-width: 400px){ body{font-size:16px;} input[type="checkbox"]{width:20px;height:20px;} }
 </style>
 </head>
 <body>
 
 <h1>🛒 Ultimate Shopping List</h1>
 <input class="search-bar" id="search" placeholder="Search items...">
-<div>
+<div class="details-note">Checked items are saved automatically. Optional items italic. Drag items to reorder.</div>
+<div style="margin-bottom:10px;">
 <button id="reset-btn">Reset All</button>
 <button id="undo-btn">Undo</button>
-<button id="theme-btn">Toggle Dark/Light</button>
-<button id="export-json-btn">Export JSON</button>
-<button id="export-csv-btn">Export CSV</button>
 </div>
-<div class="details-note">Checked items saved automatically. Optional items italic. Drag to reorder. Add new items below.</div>
 
-<!-- Add new item -->
-<div style="margin:15px 0; display:flex; gap:5px; flex-wrap:wrap;">
+<!-- Add item -->
+<div class="add-item-container">
 <input type="text" id="new-item-name" placeholder="Item name">
 <input type="text" id="new-item-category" placeholder="Category">
 <input type="text" id="new-item-quantity" placeholder="Qty (e.g., 1 cup)">
@@ -66,7 +123,7 @@ button { cursor: pointer; margin: 5px 2px; }
 <details>
   <summary>📖 Recipe Links</summary>
   <ul>
-    <li><a href="https://hildaskitchenblog.com/recipe/stuffed-onions-sogan-dolma/#" target="_blank">Stuffed Onions (Sogan Dolma)</a></li>
+    <li><a href="https://hildaskitchenblog.com/recipe/stuffed-onions-sogan-dolma/#" target="_blank">Stuffed Onions</a></li>
     <li><a href="https://www.ambitiouskitchen.com/gochujang-chicken-bowls/" target="_blank">Gochujang Chicken Bowls</a></li>
     <li><a href="https://www.ambitiouskitchen.com/dal-recipe/" target="_blank">Dal Recipe</a></li>
   </ul>
@@ -114,127 +171,65 @@ let categories = [
 
 const listContainer = document.getElementById('list-container');
 let undoStack = [];
-let itemIdCounter = 1000;
 
-// Save/load functions
-function saveState() { localStorage.setItem('shoppingList', JSON.stringify(categories)); }
-function loadState() { 
-  const saved = localStorage.getItem('shoppingList'); 
-  if(saved) categories=JSON.parse(saved); 
-}
+// Save/load
+function saveState(){ localStorage.setItem('shoppingList', JSON.stringify(categories)); }
+function loadState(){ const saved=localStorage.getItem('shoppingList'); if(saved) categories=JSON.parse(saved); }
 
-// Render list
-function renderList() {
+// Render
+function renderList(){
   listContainer.innerHTML='';
-  categories.forEach((cat, ci)=>{
-    const catDetails = document.createElement('details');
-    catDetails.classList.add('category'); catDetails.open=true;
-    catDetails.dataset.catIndex=ci;
-    const summary = document.createElement('summary'); summary.textContent=cat.name;
-    const progressDiv = document.createElement('div'); progressDiv.classList.add('progress');
-    const progressBar = document.createElement('div'); progressBar.classList.add('progress-bar');
-    progressDiv.appendChild(progressBar);
-    catDetails.appendChild(summary); catDetails.appendChild(progressDiv);
-    cat.items.forEach((item, ii)=>{
-      const label = document.createElement('label');
-      label.draggable=true;
-      const checkbox = document.createElement('input');
-      checkbox.type='checkbox'; checkbox.dataset.ci=ci; checkbox.dataset.ii=ii;
+  categories.forEach((cat,ci)=>{
+    const catDetails=document.createElement('details'); catDetails.classList.add('category'); catDetails.open=true;
+    const summary=document.createElement('summary'); summary.textContent=cat.name;
+    const progressDiv=document.createElement('div'); progressDiv.classList.add('progress');
+    const progressBar=document.createElement('div'); progressBar.classList.add('progress-bar');
+    progressDiv.appendChild(progressBar); catDetails.appendChild(summary); catDetails.appendChild(progressDiv);
+
+    cat.items.forEach((item,ii)=>{
+      const label=document.createElement('label'); label.draggable=true;
+      const checkbox=document.createElement('input'); checkbox.type='checkbox'; checkbox.dataset.ci=ci; checkbox.dataset.ii=ii;
       if(item.checked) checkbox.checked=true;
-      const spanText = document.createElement('span'); spanText.textContent=item.name+(item.qty?' – '+item.qty:'');
+      const spanText=document.createElement('span'); spanText.textContent=item.name; 
       if(item.optional) spanText.classList.add('optional-item');
-      if(item.favorite) { spanText.style.fontWeight='bold'; }
-      const notes = document.createElement('input'); notes.type='text'; notes.placeholder='Notes'; notes.value=item.notes||''; notes.classList.add('notes');
-      notes.addEventListener('input', e=>{ item.notes=e.target.value; saveState(); });
-      checkbox.addEventListener('change', e=>{
-        undoStack.push({ci, ii, prev:item.checked});
-        item.checked=checkbox.checked; saveState(); updateProgress(); 
-      });
-      label.appendChild(checkbox); label.appendChild(spanText); label.appendChild(notes);
+      if(item.qty) { const spanQty=document.createElement('span'); spanQty.textContent=' – '+item.qty; spanQty.classList.add('qty'); spanText.appendChild(spanQty); }
+      checkbox.addEventListener('change', e=>{ undoStack.push({ci,ii,prev:item.checked}); item.checked=checkbox.checked; saveState(); updateProgress(); });
+      label.appendChild(checkbox); label.appendChild(spanText);
       // Drag/drop
       label.addEventListener('dragstart', e=>label.classList.add('dragging'));
       label.addEventListener('dragend', e=>label.classList.remove('dragging'));
       label.addEventListener('dragover', e=>e.preventDefault());
-      label.addEventListener('drop', e=>{
-        e.preventDefault();
-        const dragging = document.querySelector('.dragging');
-        if(dragging && dragging!==label) { 
-          const parent = label.parentElement;
-          parent.insertBefore(dragging,label);
-        }
-      });
+      label.addEventListener('drop', e=>{ e.preventDefault(); const dragging=document.querySelector('.dragging'); if(dragging && dragging!==label){ label.parentElement.insertBefore(dragging,label); } });
       catDetails.appendChild(label);
     });
     listContainer.appendChild(catDetails);
   });
   updateProgress();
 }
-function updateProgress() {
-  document.querySelectorAll('details.category').forEach(cat=>{
-    const items = cat.querySelectorAll('input[type="checkbox"]');
-    if(items.length===0) return;
-    const checked = Array.from(items).filter(i=>i.checked).length;
-    const percent = (checked/items.length)*100;
-    const bar = cat.querySelector('.progress-bar');
-    if(bar) bar.style.width=percent+'%';
-  });
-}
+function updateProgress(){ document.querySelectorAll('details.category').forEach(cat=>{ const items=cat.querySelectorAll('input[type="checkbox"]'); if(items.length===0)return; const checked=Array.from(items).filter(i=>i.checked).length; const percent=(checked/items.length)*100; const bar=cat.querySelector('.progress-bar'); if(bar)bar.style.width=percent+'%'; }); }
 
-// Undo/reset/theme
-document.getElementById('reset-btn').addEventListener('click', ()=>{
-  if(!confirm('Reset all checkboxes?')) return;
-  categories.forEach(cat=>cat.items.forEach(item=>item.checked=false)); saveState(); renderList();
-});
-document.getElementById('undo-btn').addEventListener('click', ()=>{
-  const last = undoStack.pop(); if(!last) return;
-  const item = categories[last.ci].items[last.ii];
-  item.checked=last.prev; saveState(); renderList();
-});
-document.getElementById('theme-btn').addEventListener('click', ()=>{ document.body.classList.toggle('dark'); });
+// Undo/reset
+document.getElementById('reset-btn').addEventListener('click', ()=>{ if(!confirm('Reset all checkboxes?')) return; categories.forEach(cat=>cat.items.forEach(item=>item.checked=false)); saveState(); renderList(); });
+document.getElementById('undo-btn').addEventListener('click', ()=>{ const last=undoStack.pop(); if(!last)return; const item=categories[last.ci].items[last.ii]; item.checked=last.prev; saveState(); renderList(); });
 
 // Add new item
 document.getElementById('add-item-btn').addEventListener('click', ()=>{
-  const name = document.getElementById('new-item-name').value.trim();
-  if(!name) return alert('Enter item name');
-  const catName = document.getElementById('new-item-category').value.trim()||'Other / Miscellaneous';
-  const qty = document.getElementById('new-item-quantity').value.trim();
-  const optional = document.getElementById('new-item-optional').checked;
-  const favorite = document.getElementById('new-item-favorite').checked;
-  let cat = categories.find(c=>c.name===catName);
-  if(!cat){ cat={name:catName,items:[]}; categories.push(cat);}
+  const name=document.getElementById('new-item-name').value.trim(); if(!name) return alert('Enter item name');
+  const catName=document.getElementById('new-item-category').value.trim()||'Other / Miscellaneous';
+  const qty=document.getElementById('new-item-quantity').value.trim();
+  const optional=document.getElementById('new-item-optional').checked;
+  const favorite=document.getElementById('new-item-favorite').checked;
+  let cat=categories.find(c=>c.name===catName); if(!cat){ cat={name:catName,items:[]}; categories.push(cat); }
   cat.items.push({name,qty,optional,favorite});
   saveState(); renderList();
-  document.getElementById('new-item-name').value=''; document.getElementById('new-item-quantity').value='';
-  document.getElementById('new-item-optional').checked=false; document.getElementById('new-item-favorite').checked=false;
+  document.getElementById('new-item-name').value=''; document.getElementById('new-item-quantity').value=''; document.getElementById('new-item-optional').checked=false; document.getElementById('new-item-favorite').checked=false;
 });
 
 // Search/filter
-document.getElementById('search').addEventListener('input', e=>{
-  const val=e.target.value.toLowerCase();
-  document.querySelectorAll('label').forEach(label=>{
-    const text = label.querySelector('span').textContent.toLowerCase();
-    label.style.display=text.includes(val)?'flex':'none';
-  });
-});
-
-// Export JSON
-document.getElementById('export-json-btn').addEventListener('click', ()=>{
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(categories));
-  const dlAnchor = document.createElement('a'); dlAnchor.setAttribute('href', dataStr); dlAnchor.setAttribute('download','shopping_list.json'); dlAnchor.click();
-});
-// Export CSV
-document.getElementById('export-csv-btn').addEventListener('click', ()=>{
-  let csv = 'Category,Item,Quantity,Optional,Favorite,Notes\n';
-  categories.forEach(cat=>cat.items.forEach(item=>{
-    csv+=`"${cat.name}","${item.name}","${item.qty||''}",${item.optional?1:0},${item.favorite?1:0},"${item.notes||''}"\n`;
-  }));
-  const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-  const dlAnchor = document.createElement('a'); dlAnchor.setAttribute('href', dataStr); dlAnchor.setAttribute('download','shopping_list.csv'); dlAnchor.click();
-});
+document.getElementById('search').addEventListener('input', e=>{ const val=e.target.value.toLowerCase(); document.querySelectorAll('label').forEach(label=>{ const text=label.querySelector('span').textContent.toLowerCase(); label.style.display=text.includes(val)?'flex':'none'; }); });
 
 // Init
 loadState(); renderList();
-
 </script>
 </body>
 </html>
