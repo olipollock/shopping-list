@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Shopping List</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-size: 18px;
+  padding: 20px;
+  background: #f8f9fa;
+  margin: 0;
+  color: #222;
+}
+h1 { text-align: center; color: #2a7ae2; margin-bottom: 20px; }
+details { background: #e0f7ff; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; }
+details[open] { background: #ccefff; }
+summary { font-weight: bold; font-size: 1.2em; color: #007acc; cursor: pointer; outline: none; }
+label { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-radius: 6px; position: relative; }
+label:hover { background: rgba(0,122,204,0.08); }
+input[type="checkbox"] { appearance: none; width: 22px; height: 22px; border: 2px solid #007acc; border-radius: 5px; margin-right: 10px; cursor: pointer; position: relative; }
+input[type="checkbox"]:checked::after { content: "✔"; position: absolute; left: 3px; top: 0; font-size: 18px; color: #007acc; }
+input[type="checkbox"]:checked + span { text-decoration: line-through; color: #555; }
+span.optional-item { font-style: italic; font-size: 0.9em; color: #555; }
+span.qty { font-size: 0.9em; margin-left:5px; color:#555; }
+.details-note { font-size: 0.9em; color: #555; margin-bottom:10px; }
+hr { border: none; border-top: 1px solid #ccc; margin: 10px 0; }
+.search-bar { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #007acc; margin-bottom: 15px; }
+button { cursor: pointer; padding: 4px 8px; border: none; background: #007acc; color: #fff; border-radius: 6px; transition: background 0.2s; }
+button:hover { background: #005fa3; }
+.add-item-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; align-items:center; }
+.add-item-container input[type="text"], .add-item-container input[list] { flex:1 1 140px; padding:6px 8px; border-radius:6px; border:1px solid #007acc; }
+.add-item-container label { display:flex; align-items:center; gap:4px; font-size:0.9em; }
+.progress { height: 10px; background: #ccc; border-radius: 5px; margin: 5px 0 10px 0; overflow: hidden; }
+.progress-bar { height: 100%; background: #007acc; width: 0%; transition: width 0.3s; }
+.dragging { opacity: 0.5; }
+@media (max-width: 400px){ body{font-size:16px;} input[type="checkbox"]{width:20px;height:20px;} }
+</style>
+</head>
+<body>
+
+<h1>🛒 Ultimate Shopping List</h1>
+<input class="search-bar" id="search" placeholder="Search items...">
+<div class="details-note">Checked items are saved automatically. Optional items italic. Drag items to reorder.</div>
+<div style="margin-bottom:10px;">
+<button id="reset-btn">Reset All</button>
+<button id="undo-btn">Undo</button>
+</div>
+
+<div class="add-item-container">
+<input type="text" id="new-item-name" placeholder="Item name">
+<input list="category-list" id="new-item-category" placeholder="Category">
+<datalist id="category-list">
+  <option value="Produce / Fresh">
+  <option value="Meat & Protein">
+  <option value="Dairy & Cheese">
+  <option value="Grains & Bread">
+  <option value="Canned / Sauces">
+  <option value="Spices & Seasonings">
+  <option value="Nuts & Seeds">
+  <option value="Other / Miscellaneous">
+</datalist>
+<input type="text" id="new-item-quantity" placeholder="Qty (e.g., 1 cup)">
+<label><input type="checkbox" id="new-item-optional"> Optional</label>
+<label><input type="checkbox" id="new-item-favorite"> Favorite</label>
+<button id="add-item-btn">Add Item</button>
+</div>
+
+<div id="list-container"></div>
+
+<details>
+  <summary>📖 Recipe Links</summary>
+  <ul>
+    <li><a href="https://hildaskitchenblog.com/recipe/stuffed-onions-sogan-dolma/#" target="_blank">Stuffed Onions</a></li>
+    <li><a href="https://www.ambitiouskitchen.com/gochujang-chicken-bowls/" target="_blank">Gochujang Chicken Bowls</a></li>
+    <li><a href="https://www.ambitiouskitchen.com/dal-recipe/" target="_blank">Dal Recipe</a></li>
+  </ul>
+</details>
+
+<script>
+let categories = [
+{ name: 'Produce / Fresh', items: [
+  {name:'Yellow onions', qty:'7–9 medium'}, {name:'Red onion', qty:'1 medium'},
+  {name:'Yellow onion (for dal)', qty:'1 medium'}, {name:'Potatoes', qty:'3 medium'},
+  {name:'Garlic', qty:'10 cloves'}, {name:'Scallions', qty:'6'},
+  {name:'Red bell pepper', qty:'1 large'}, {name:'Lemon', qty:'1'},
+  {name:'Fresh lemon juice', qty:'1 Tbsp'}, {name:'Fresh ginger', qty:'1 (2-inch) knob'},
+  {name:'Baby spinach', qty:'2 cups'}, {name:'Italian parsley', qty:'½ cup', sub:'Herbs'},
+  {name:'Mint leaves', qty:'½ cup', sub:'Herbs'}, {name:'Fresh dill', qty:'⅓ cup', sub:'Herbs'},
+  {name:'Fresh basil', qty:'½ cup torn', sub:'Herbs'}, {name:'Fresh cilantro leaves', qty:'small bunch', sub:'Herbs'}
+]},
+{ name: 'Meat & Protein', items:[
+  {name:'Beef or lamb, diced', qty:'⅓ lb'}, {name:'Lean ground chicken', qty:'1 lb'},
+  {name:'Ham', optional:true}
+]},
+{ name: 'Dairy & Cheese', items:[{name:'Garlic cheese', optional:true}]},
+{ name: 'Grains & Bread', items:[
+  {name:'Jasmine rice', qty:'1 cup'}, {name:'Extra rice', qty:'enough for 4 servings'},
+  {name:'Yellow moong dal', qty:'1 cup'}, {name:'Bagels', optional:true},
+  {name:'Naan, flatbread, or quinoa', qty:'for dal serving'}
+]},
+{ name: 'Canned / Sauces', items:[
+  {name:'Tomato paste', qty:'4 Tbsp + 1 tsp'}, {name:'Canned diced or crushed tomatoes', qty:'1 can'},
+  {name:'Canned coconut milk', qty:'1 can'}, {name:'Pomegranate molasses', qty:'2 Tbsp'},
+  {name:'Gochujang', qty:'2–3 Tbsp'}, {name:'Soy sauce', qty:'¼ cup'}, {name:'Rice vinegar', qty:'2 Tbsp'}
+]},
+{ name: 'Spices & Seasonings', items:[
+  {name:'Paprika', qty:'2 tsp'}, {name:'Cayenne pepper', qty:'1 tsp total'}, {name:'Ground turmeric', qty:'½ tsp'},
+  {name:'Ground cumin', qty:'1½ tsp'}, {name:'Ground coriander', qty:'1 tsp'}
+]},
+{ name: 'Nuts & Seeds', items:[
+  {name:'Roasted or toasted cashews', qty:'⅓ cup'}, {name:'Sesame seeds', qty:'for garnish'}
+]},
+{ name: 'Other / Miscellaneous', items:[
+  {name:'Arrowroot starch', qty:'2 tsp'}, {name:'Tin foil', qty:'1 roll'}
+]}
+];
+
+const listContainer=document.getElementById('list-container');
+let undoStack=[];
+
+// Save/load
+function saveState(){ localStorage.setItem('shoppingList', JSON.stringify(categories)); }
+function loadState(){ const saved=localStorage.getItem('shoppingList'); if(saved) categories=JSON.parse(saved); }
+
+// Render
+function renderList(){
+  listContainer.innerHTML='';
+  categories.forEach((cat,ci)=>{
+    if(cat.items.length===0) return;
+    const catDetails=document.createElement('details'); catDetails.classList.add('category'); catDetails.open=true;
+    const summary=document.createElement('summary'); summary.textContent=cat.name;
+    const progressDiv=document.createElement('div'); progressDiv.classList.add('progress');
+    const progressBar=document.createElement('div'); progressBar.classList.add('progress-bar'); progressDiv.appendChild(progressBar); catDetails.appendChild(summary); catDetails.appendChild(progressDiv);
+
+    cat.items.forEach((item,ii)=>{
+      const label=document.createElement('label'); label.draggable=true;
+      const checkbox=document.createElement('input'); checkbox.type='checkbox'; checkbox.dataset.ci=ci; checkbox.dataset.ii=ii;
+      if(item.checked) checkbox.checked=true;
+      const spanText=document.createElement('span'); spanText.textContent=item.name; if(item.optional) spanText.classList.add('optional-item');
+
+      // Quantity display
+      const qtySpan=document.createElement('span'); qtySpan.classList.add('qty');
+      if(item.qtyNumber===undefined) item.qtyNumber=1;
+      qtySpan.textContent = item.qtyNumber + (item.qty ? ' – ' + item.qty : '');
+
+      checkbox.addEventListener('change', e=>{ undoStack.push({ci,ii,prev:item.checked}); item.checked=checkbox.checked; saveState(); updateProgress(); });
+
+      label.appendChild(checkbox); label.appendChild(spanText); label.appendChild(qtySpan);
+
+      // Drag/drop
+      label.addEventListener('dragstart', e=>label.classList.add('dragging'));
+      label.addEventListener('dragend', e=>label.classList.remove('dragging'));
+      label.addEventListener('dragover', e=>e.preventDefault());
+      label.addEventListener('drop', e=>{ e.preventDefault(); const dragging=document.querySelector('.dragging'); if(dragging && dragging!==label){ label.parentElement.insertBefore(dragging,label); } });
+
+      catDetails.appendChild(label);
+    });
+    listContainer.appendChild(catDetails);
+  });
+  updateProgress();
+}
+
+function updateProgress(){ document.querySelectorAll('details.category').forEach(cat=>{ const items=cat.querySelectorAll('input[type="checkbox"]'); if(items.length===0)return; const checked=Array.from(items).filter(i=>i.checked).length; const percent=(checked/items.length)*100; const bar=cat.querySelector('.progress-bar'); if(bar)bar.style.width=percent+'%'; }); }
+
+// Undo/reset
+document.getElementById('reset-btn').addEventListener('click', ()=>{ if(!confirm('Reset all checkboxes?')) return; categories.forEach(cat=>cat.items.forEach(item=>item.checked=false)); saveState(); renderList(); });
+document.getElementById('undo-btn').addEventListener('click', ()=>{ const last=undoStack.pop(); if(!last)return; const item=categories[last.ci].items[last.ii]; item.checked=last.prev; saveState(); renderList(); });
+
+// Add new item
+document.getElementById('add-item-btn').addEventListener('click', ()=>{
+  const name=document.getElementById('new-item-name').value.trim(); if(!name)return alert('Enter item name');
+  let catName=document.getElementById('new-item-category').value.trim(); if(!catName) catName='Other / Miscellaneous';
+  const qty=document.getElementById('new-item-quantity').value.trim();
+  const optional=document.getElementById('new-item-optional').checked;
+  const favorite=document.getElementById('new-item-favorite').checked;
+  let cat=categories.find(c=>c.name===catName); if(!cat){ cat={name:catName,items:[]}; categories.push(cat); }
+  cat.items.push({name,qty,optional,favorite,qtyNumber:1});
+  saveState(); renderList();
+  document.getElementById('new-item-name').value=''; document.getElementById('new-item-quantity').value=''; document.getElementById('new-item-optional').checked=false; document.getElementById('new-item-favorite').checked=false;
+});
+
+// Search/filter
+document.getElementById('search').addEventListener('input', e=>{ const val=e.target.value.toLowerCase(); document.querySelectorAll('label').forEach(label=>{ const text=label.querySelector('span').textContent.toLowerCase(); label.style.display=text.includes(val)?'flex':'none'; }); });
+
+// Init
+loadState(); renderList();
+</script>
+</body>
+</html>
