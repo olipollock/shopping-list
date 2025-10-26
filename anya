@@ -1,96 +1,34 @@
-import React, { useEffect, useState, useRef } from "react";
-const secs = totalSec % 60;
-return { hrs, mins, secs };
-};
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anya Countdown</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f7f7f7;
+      color: #222;
+    }
 
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
 
-const t = formatTime(remainingMs);
-const finished = endTime && remainingMs === 0;
-
-
-return (
-<div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-<div className="max-w-2xl w-full bg-white shadow-md rounded-lg p-6">
-<h1 className="text-2xl font-semibold mb-1">Countdown: Bin all of Anya’s items</h1>
-<p className="text-sm text-gray-600 mb-4">8-hour timer — start when ready. This app saves state locally in your browser.</p>
-
-
-<div className="mb-4">
-<div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-<div
-className="h-4 bg-green-500 transition-all"
-style={{ width: `${pct}%` }}
-aria-valuenow={pct}
-aria-valuemin={0}
-aria-valuemax={100}
-/>
-</div>
-</div>
-
-
-<div className="flex items-baseline gap-4 mb-6">
-<div className="text-4xl font-mono">{String(t.hrs).padStart(2, '0')}:{String(t.mins).padStart(2, '0')}:{String(t.secs).padStart(2, '0')}</div>
-<div className="text-sm text-gray-500">remaining</div>
-</div>
-
-
-{finished ? (
-<div className="p-4 bg-green-50 rounded mb-4">
-<div className="text-lg font-semibold text-green-700">Time’s up — bin time!</div>
-<div className="text-sm text-gray-700">You can reset to start over.</div>
-</div>
-) : null}
-
-
-<div className="flex gap-3 flex-wrap">
-{!endTime && (
-<button onClick={startTimer} className="px-4 py-2 bg-blue-600 text-white rounded">Start 8-hour timer</button>
-)}
-
-
-{endTime && !running && (
-<button onClick={resumeTimer} className="px-4 py-2 bg-green-600 text-white rounded">Resume</button>
-)}
-
-
-{running && (
-<button onClick={stopTimer} className="px-4 py-2 bg-yellow-500 text-white rounded">Pause</button>
-)}
-
-
-{endTime && (
-<button onClick={resetTimer} className="px-4 py-2 bg-gray-200 rounded">Reset</button>
-)}
-
-
-<div className="ml-auto text-sm text-gray-500 self-center">Status: {running ? 'Running' : endTime ? 'Paused' : 'Not started'}</div>
-</div>
-
-
-<hr className="my-6" />
-
-
-<div className="text-sm text-gray-600">
-<p className="mb-2">Notes:</p>
-<ul className="list-disc ml-5 space-y-1">
-<li>This app stores the timer locally in your browser (localStorage). If you clear site data it will be lost.</li>
-<li>For GitHub Pages: build with your usual React toolchain and deploy the compiled site to gh-pages branch.</li>
-<li>Buttons below are simple helpers for testing:</li>
-</ul>
-
-
-<div className="mt-3 flex gap-2">
-<button onClick={() => startFromNowMinus(60*60*1000)} className="px-3 py-1 bg-indigo-100 rounded text-sm">Start 1h elapsed</button>
-<button onClick={() => startFromNowMinus(4*60*60*1000)} className="px-3 py-1 bg-indigo-100 rounded text-sm">Start 4h elapsed</button>
-<button onClick={() => startFromNowMinus(7*60*60*1000)} className="px-3 py-1 bg-indigo-100 rounded text-sm">Start 7h elapsed</button>
-</div>
-</div>
-
-
-<footer className="mt-6 text-xs text-gray-400">
-Built for a quick countdown. No tracking. Local only.
-</footer>
-</div>
-</div>
-);
-}
+    #timer {
+      font-size: 3rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Anya's Countdown</h1>
+  <div id="timer">Loading..
